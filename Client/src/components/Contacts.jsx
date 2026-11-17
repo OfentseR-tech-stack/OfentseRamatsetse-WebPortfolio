@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { socials } from "./Socials";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 export default function Contacts() {
   // ── Contact form state
   const [form, setForm]           = useState({ name: "", email: "", message: "" });
@@ -13,12 +15,12 @@ export default function Contacts() {
   const [commentSent, setCommentSent] = useState(false);
 
   // ── Load comments on mount
-useEffect(() => {
-  fetch("http://localhost:5000/api/contact/comments")
-    .then((r) => r.json())
-    .then((data) => setComments(Array.isArray(data) ? data : []))
-    .catch(() => setComments([]));
-}, []);
+  useEffect(() => {
+    fetch(`${API_URL}/api/contact/comments`)
+      .then((r) => r.json())
+      .then((data) => setComments(Array.isArray(data) ? data : []))
+      .catch(() => setComments([]));
+  }, []);
 
   // ── Submit contact form
   const handleFormSubmit = async (e) => {
@@ -29,7 +31,7 @@ useEffect(() => {
     }
     setFormError("");
     try {
-      const res = await fetch("http://localhost:5000/api/contact", {
+      const res = await fetch(`${API_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -49,7 +51,7 @@ useEffect(() => {
     e.preventDefault();
     if (!newComment.name || !newComment.comment) return;
     try {
-      const res = await fetch("http://localhost:5000/api/contact/comments", {
+      const res = await fetch(`${API_URL}/api/contact/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newComment),
@@ -67,7 +69,7 @@ useEffect(() => {
   // ── Delete comment
   const handleDelete = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/contact/comments/${id}`, {
+      await fetch(`${API_URL}/api/contact/comments/${id}`, {
         method: "DELETE",
       });
       setComments(comments.filter((c) => c._id !== id));
@@ -79,7 +81,6 @@ useEffect(() => {
   return (
     <section className="contacts" id="contact">
       <div className="contacts__inner">
-
 
         {/* ── Contact details form ── */}
         <div className="contacts__form-wrap">
@@ -103,7 +104,6 @@ useEffect(() => {
                   className="contacts__input" value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
-              
             </div>
             <div className="contacts__field">
               <label className="contacts__label">Message</label>
@@ -115,18 +115,14 @@ useEffect(() => {
               Send Message →
             </button>
           </form>
-          
         </div>
-         {/* ── Contact info ── */}
+
+        {/* ── Contact info ── */}
         <div className="contacts__info-col">
           <a href="mailto:OfentseRamatsetseWeb@gmail.com" className="contacts__link">
             <span className="contacts__icon">✉</span>
             OfentseRamatsetseWeb@gmail.com
           </a>
-          {/*<a href="tel:+27000000000" className="contacts__link">
-            <span className="contacts__icon">📞</span>
-            +27 000 000 000
-          </a>*/}
           <div className="contacts__socials">
             {socials.map((s, i) => (
               <a href={s.href} className="contacts__social" key={i}
@@ -138,7 +134,7 @@ useEffect(() => {
         </div>
 
       </div>
-      
+
       {/* ── Comments section ── */}
       <div className="contacts__comments-section">
         <h3 className="contacts__comments-title">Leave a Comment</h3>
