@@ -61,24 +61,17 @@ router.post("/comments", async (req, res) => {
     res.status(400).json({ error: "Failed to save comment" });
   }
 });
-
-// Delete a comment: owner token or admin key
+// Delete a comment: owner token only
 router.delete("/comments/:id", async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id).select("+deleteTokenHash");
     if (!comment) return res.status(404).json({ error: "Not found" });
 
     const token = req.get("x-delete-token") || "";
-    const adminKey = req.get("x-admin-key") || "";
-
-    const isAdmin =
-      process.env.ADMIN_KEY && adminKey && safeEqual(adminKey, process.env.ADMIN_KEY);
     const isOwner =
       comment.deleteTokenHash && token && safeEqual(hash(token), comment.deleteTokenHash);
 
-    if (!isAdmin && !isOwner) {
-      return res.status(403).json({ error: "Not allowed" });
-    }
+    if (!isOwner) return res.status(403).json({ error: "Not allowed" });
 
     await comment.deleteOne();
     res.json({ success: true });

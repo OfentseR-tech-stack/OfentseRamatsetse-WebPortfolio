@@ -13,10 +13,6 @@ const loadTokens = () => {
 const saveTokens = (t) => {
   try { localStorage.setItem(TOKEN_KEY, JSON.stringify(t)); } catch {}
 };
-const getAdminKey = () => {
-  try { return localStorage.getItem("adminKey") || ""; }
-  catch { return ""; }
-};
 
 export default function Contacts() {
   // ── Contact form state
@@ -29,7 +25,6 @@ export default function Contacts() {
   const [newComment, setNewComment]   = useState({ name: "", comment: "" });
   const [commentSent, setCommentSent] = useState(false);
   const [tokens, setTokens]           = useState(loadTokens);
-  const adminKey = getAdminKey();
 
   // ── Load comments on mount
   useEffect(() => {
@@ -89,16 +84,12 @@ export default function Contacts() {
     }
   };
 
-  // ── Delete comment (owner token or admin key)
+  // ── Delete comment (owner token only)
   const handleDelete = async (id) => {
     try {
-      const headers = {};
-      if (tokens[id]) headers["x-delete-token"] = tokens[id];
-      if (adminKey) headers["x-admin-key"] = adminKey;
-
       const res = await fetch(`${API_URL}/api/contact/comments/${id}`, {
         method: "DELETE",
-        headers,
+        headers: { "x-delete-token": tokens[id] || "" },
       });
       if (!res.ok) return;
 
@@ -194,7 +185,7 @@ export default function Contacts() {
                 <span className="contacts__comment-date">
                   {new Date(c.createdAt).toLocaleDateString()}
                 </span>
-                {(tokens[c._id] || adminKey) && (
+                {tokens[c._id] && (
                   <button
                     className="contacts__comment-delete"
                     onClick={() => handleDelete(c._id)}
