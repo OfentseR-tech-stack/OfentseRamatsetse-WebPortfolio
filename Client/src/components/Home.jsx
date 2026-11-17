@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { useEffect, useRef } from "react";
 import portrait from '../assets/images/portrait/Realistic black suit 1-Picsart-BackgroundRemover.webp';
 import { socials } from "./Socials";
