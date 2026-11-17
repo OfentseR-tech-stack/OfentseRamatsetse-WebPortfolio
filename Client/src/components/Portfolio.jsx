@@ -25,7 +25,7 @@ import aiImg       from "../assets/images/projects/HEARTRATEMONTORGIF.gif";
 import ai2Img      from "../assets/images/projects/AI2.jpg";
 import frontEndImg from "../assets/icons/frontend-developer.gif";
 import hardwareImg from "../assets/images/projects/Hardware Proto.gif";
-import WEBFolio from "../assets/images/projects/WEBFolio.gif";
+import WEBFolio from "../assets/images/projects/WEBFolio.GIF";
 import mobileImg   from "../assets/images/projects/Mobile dev.png";
 const skills = [
   {
