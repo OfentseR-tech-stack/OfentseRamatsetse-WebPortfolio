@@ -2,29 +2,42 @@ import { useEffect, useRef } from "react";
 import portrait from '../assets/images/portrait/Realistic black suit 1-Picsart-BackgroundRemover.webp';
 import { socials } from "./Socials";
 
-
 function Home() {
   const heroRef = useRef(null);
+  const imgRef = useRef(null);
+  const [showSpline, setShowSpline] = useState(false);
 
+  // Fade the hero in
   useEffect(() => {
     const el = heroRef.current;
     if (!el) return;
-    setTimeout(() => el.classList.add("home--visible"), 100);
+    const t = setTimeout(() => el.classList.add("home--visible"), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Mount Spline only after the portrait has loaded (or after 2.5s as a fallback)
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setShowSpline(true);
+      return;
+    }
+    const fallback = setTimeout(() => setShowSpline(true), 2500);
+    return () => clearTimeout(fallback);
   }, []);
 
   return (
     <section className="home" id="home" ref={heroRef}>
       <div className="logo-container">
-        <iframe
-        src="https://my.spline.design/thebluemarble-s04RVbddgPRESuzvi4Cx0JiR/"
-        className="home__spline-iframe"
-        frameBorder="0"
-        title="background"
-      />
-       <div className="logo__watermark-cover" />
+        {showSpline && (
+          <iframe
+            src="https://my.spline.design/thebluemarble-s04RVbddgPRESuzvi4Cx0JiR/"
+            className="home__spline-iframe"
+            frameBorder="0"
+            title="background"
+          />
+        )}
+        <div className="logo__watermark-cover" />
       </div>
-      {/* ── Spline iframe background ── */}
-      
 
       {/* ── Dark overlay ── */}
       <div className="home__overlay" />
@@ -34,7 +47,7 @@ function Home() {
         <div className="home__content">
           <p className="home__greeting">Hi, My Name Is</p>
           <h1 className="home__name">OFENTSE </h1><h1 className="home__name">RAMATSETSE</h1>
-          <h2 className="home__title" >AND I'M A <a className="btn-shine">WEB DEVELOPER</a></h2>
+          <h2 className="home__title">AND I'M A <span className="btn-shine">WEB DEVELOPER</span></h2>
           <p className="home__tagline">
             Crafting Digital Excellence for a Future <br /> Beyond Imagination.
           </p>
@@ -42,7 +55,7 @@ function Home() {
             More about me &nbsp;→
           </a>
         </div>
-        
+
         <div className="landing__socials">
           {socials.map((s, i) => (
             <a
@@ -58,9 +71,16 @@ function Home() {
           ))}
         </div>
 
-
         <div className="home__portrait-wrap">
-          <img src={portrait} alt="Ofentse" className="home__portrait" />
+          <img
+            ref={imgRef}
+            src={portrait}
+            alt="Ofentse"
+            className="home__portrait"
+            loading="eager"
+            decoding="async"
+            onLoad={() => setShowSpline(true)}
+          />
         </div>
       </div>
 
@@ -74,7 +94,6 @@ function Home() {
           </svg>
         </div>
       </div>
-
     </section>
   );
 }
