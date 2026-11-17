@@ -3,6 +3,21 @@ import { socials } from "./Socials";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+// ── Delete-token helpers (per-browser ownership of comments)
+const TOKEN_KEY = "commentTokens";
+
+const loadTokens = () => {
+  try { return JSON.parse(localStorage.getItem(TOKEN_KEY)) || {}; }
+  catch { return {}; }
+};
+const saveTokens = (t) => {
+  try { localStorage.setItem(TOKEN_KEY, JSON.stringify(t)); } catch {}
+};
+const getAdminKey = () => {
+  try { return localStorage.getItem("adminKey") || ""; }
+  catch { return ""; }
+};
+
 export default function Contacts() {
   // ── Contact form state
   const [form, setForm]           = useState({ name: "", email: "", message: "" });
@@ -13,6 +28,8 @@ export default function Contacts() {
   const [comments, setComments]       = useState([]);
   const [newComment, setNewComment]   = useState({ name: "", comment: "" });
   const [commentSent, setCommentSent] = useState(false);
+  const [tokens, setTokens]           = useState(loadTokens);
+  const adminKey = getAdminKey();
 
   // ── Load comments on mount
   useEffect(() => {
@@ -56,7 +73,13 @@ export default function Contacts() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newComment),
       });
-      const saved = await res.json();
+      if (!res.ok) return;
+      const { deleteToken, ...saved } = await res.json();
+
+      const updated = { ...tokens, [saved._id]: deleteToken };
+      setTokens(updated);
+      saveTokens(updated);
+
       setComments([saved, ...comments]);
       setNewComment({ name: "", comment: "" });
       setCommentSent(true);
@@ -66,13 +89,24 @@ export default function Contacts() {
     }
   };
 
-  // ── Delete comment
+  // ── Delete comment (owner token or admin key)
   const handleDelete = async (id) => {
     try {
-      await fetch(`${API_URL}/api/contact/comments/${id}`, {
+      const headers = {};
+      if (tokens[id]) headers["x-delete-token"] = tokens[id];
+      if (adminKey) headers["x-admin-key"] = adminKey;
+
+      const res = await fetch(`${API_URL}/api/contact/comments/${id}`, {
         method: "DELETE",
+        headers,
       });
+      if (!res.ok) return;
+
       setComments(comments.filter((c) => c._id !== id));
+      const rest = { ...tokens };
+      delete rest[id];
+      setTokens(rest);
+      saveTokens(rest);
     } catch (err) {
       console.error("Failed to delete comment");
     }
@@ -160,13 +194,15 @@ export default function Contacts() {
                 <span className="contacts__comment-date">
                   {new Date(c.createdAt).toLocaleDateString()}
                 </span>
-                <button
-                  className="contacts__comment-delete"
-                  onClick={() => handleDelete(c._id)}
-                  title="Delete comment"
-                >
-                  🗑
-                </button>
+                {(tokens[c._id] || adminKey) && (
+                  <button
+                    className="contacts__comment-delete"
+                    onClick={() => handleDelete(c._id)}
+                    title="Delete comment"
+                  >
+                    🗑
+                  </button>
+                )}
               </div>
               <p className="contacts__comment-text">{c.comment}</p>
             </li>
