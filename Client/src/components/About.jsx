@@ -86,9 +86,9 @@ function About() {
           </p>
           <p>
             My current skill set includes React, JavaScript, prototyping,
-            database fundamentals, content editing and basic hardware project
-            development. I focus on writing readable code and presenting work in
-            a way that is clear, organised and professional.
+            database fundamentals, Visual editing and basic hardware project
+            development. I focus on presenting my work in
+            a way that is creative, clear, organised and professional.
           </p>
           <p>
             I am still growing as a developer, but I enjoy learning new tools,
