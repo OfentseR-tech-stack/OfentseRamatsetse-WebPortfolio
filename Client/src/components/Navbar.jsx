@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import cvFile from '../assets/docs/Mock_CV.pdf';
+import cvFile from '../assets/docs/CV Ofentse Ramatsetse.pdf';
 import logo from "../assets/images/portrait/Text Animation@1-412x192 (2).png";
 
 function Navbar() {
